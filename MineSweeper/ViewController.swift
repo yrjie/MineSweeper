@@ -34,6 +34,7 @@ class ViewController: UIViewController {
     
     let BOARD_SIZE:Int = 10
     var board:Board
+    let dir = [(-1,0),(1,0),(0,-1),(0,1)]
     
     required init(coder aDecoder: NSCoder){
         self.board = Board(size: BOARD_SIZE)
@@ -61,8 +62,12 @@ class ViewController: UIViewController {
 //        sender.setTitle("", forState: .Normal)
         self.moves++
         if(!sender.square.isRevealed) {
-            sender.square.isRevealed = true
-            sender.setTitle("\(sender.getLabelText())", forState: .Normal)
+            if (sender.getLabelText()==""){
+                expand(sender.square.row, col: sender.square.col)
+            } else{
+                sender.square.isRevealed = true
+                sender.setTitle("\(sender.getLabelText())", forState: .Normal)
+            }
         }
         if (sender.square.isMine){
             self.minePressed()
@@ -124,6 +129,25 @@ class ViewController: UIViewController {
     func endCurrentGame() {
         self.oneSecondTimer!.invalidate()
         self.oneSecondTimer = nil
+    }
+    
+    func expand(row: Int, col: Int){
+        if (row<0||row>=board.size||col<0||col>=board.size){
+            return
+        }
+        let sender = squareButtons[row*board.size+col]
+        if (sender.square.isRevealed||sender.getLabelText()=="M"){
+            return
+        }
+        sender.square.isRevealed = true
+        sender.setTitle("\(sender.getLabelText())", forState: .Normal)
+        if (sender.getLabelText()==""){
+            for (i, j) in dir{
+                let r1 = row+i
+                let c1 = col+j
+                expand(r1, col:c1)
+            }
+        }
     }
 }
 
